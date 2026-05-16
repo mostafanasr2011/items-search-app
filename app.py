@@ -1,14 +1,14 @@
+%%writefile app.py
 import streamlit as st
 import pandas as pd
 import io
 
-# 1. إعداد واجهة البرنامج (ضبط الحجم ليكون ملموم centered وليس wide)
+# 1. إعداد واجهة البرنامج
 st.set_page_config(page_title="منظومة البحث الذكي في البنود", page_icon="🔍", layout="centered")
 
-# ✨ 2. لمسات الـ CSS السحرية للأزرار الـ 3D والخطوط والتنسيق الملموم
+# ✨ 2. لمسات الـ CSS السحرية للأزرار والخطوط والجدول
 st.markdown("""
     <style>
-    /* استدعاء خط Cairo الشيك */
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
     
     html, body, [data-testid="stSidebar"], .stMarkdown, p, h1, h2, h3, h4, h5, h6, span, label, input, button {
@@ -16,52 +16,49 @@ st.markdown("""
         text-align: right;
     }
     
-    /* جعل محتوى الصفحة ملموم وفي المنتصف بشكل مريح للعين */
     .block-container {
         padding-top: 2rem !important;
         padding-bottom: 2rem !important;
-        max-width: 900px !important; /* تحديد أقصى عرض مريح للعين */
+        max-width: 900px !important;
     }
     
-    /* تنسيق صندوق رفع الملفات */
     [data-testid="stFileUploadDropzone"] {
         border: 2px dashed #3f51b5 !important;
         background-color: #f5f7ff;
         border-radius: 12px;
     }
     
-    /* 🛠️ تصميم الأزرار لتكون 3D حقيقية بارزة وتتأثر بالضغط */
+    /* ضبط اتجاه الجداول لتكون من اليمين للشمال مخصصة للعربي */
+    [data-testid="stDataFrame"] {
+        direction: rtl !important;
+    }
+    
+    /* تصميم الأزرار الـ 3D الحقيقية */
     div.stDownloadButton > button {
-        background-color: #2e7d32 !important; /* لون أخضر غني */
+        background-color: #2e7d32 !important;
         color: white !important;
         font-weight: 700 !important;
         font-size: 16px !important;
         padding: 12px 24px !important;
         border-radius: 8px !important;
         border: none !important;
-        
-        /* تأثير البروز الـ 3D السفلي */
         border-bottom: 5px solid #1b5e20 !important; 
         box-shadow: 0 5px 10px rgba(0,0,0,0.2) !important;
-        
         transition: all 0.1s ease !important;
         width: 100%;
         cursor: pointer;
     }
     
-    /* عند تمرير الماوس فوق الزرار 3D */
     div.stDownloadButton > button:hover {
         background-color: #338a3e !important;
     }
     
-    /* 💥 السحر الـ 3D: عند الضغط الفعلي على الزرار يتكبس لجوه */
     div.stDownloadButton > button:active {
         border-bottom: 1px solid #1b5e20 !important;
-        transform: translateY(4px) !important; /* ينزل لتحت بمقدار البروز */
+        transform: translateY(4px) !important;
         box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
     }
     
-    /* تحسين شكل خانة البحث */
     div.stTextInput > div > div > input {
         border-radius: 8px !important;
         border: 1px solid #ccc !important;
@@ -74,14 +71,13 @@ st.markdown("""
 st.title("🔍 منظومة البحث الذكي في بيانات البنود")
 st.write("ارفع ملف أو عدة ملفات أكسيل معاً، وابحث في آلاف الصفوف المدمجة فوراً!")
 
-# 4. أداة رفع الملفات (تفعيل خاصية رفع أكثر من ملف accept_multiple_files=True)
+# 4. أداة رفع الملفات
 uploaded_files = st.file_uploader(
     "📂 اسحب وأفلت ملفات الأكسيل هنا (يمكنك اختيار أكثر من ملف معاً):", 
     type=["xlsx", "xls", "csv"],
     accept_multiple_files=True
 )
 
-# دالة قراءة ودمج الملفات المتعددة بذكاء
 @st.cache_data
 def load_and_combine_data(files_list):
     combined_df = pd.DataFrame()
@@ -91,22 +87,17 @@ def load_and_combine_data(files_list):
                 current_df = pd.read_csv(file)
             else:
                 current_df = pd.read_excel(file)
-            
-            # دمج الملف الحالي مع الملفات السابقة تحت بعض
             combined_df = pd.concat([combined_df, current_df], ignore_index=True)
         except Exception as e:
             st.error(f"❌ حصلت مشكلة في ملف {file.name}: {e}")
     return combined_df
 
-# لو المستخدم رفع ملف واحد على الأقل
 if uploaded_files:
     df = load_and_combine_data(uploaded_files)
     
-    # 5. محرك البحث (قاعد في الـ Sidebar الجانبي)
     st.sidebar.markdown("### 🛠️ تصفية وفلترة البحث")
     search_query = st.sidebar.text_input("✍️ اكتب كلمة البحث هنا:", placeholder="مثال: كشاف، جوكي، متر...")
 
-    # 6. منطق البحث الذكي بترتيب الأعمدة
     if not df.empty and search_query:
         try:
             col_id = df.columns[0]     
@@ -126,11 +117,9 @@ if uploaded_files:
     else:
         search_result = df 
 
-    # 7. عرض النتائج والإحصائيات
     if not df.empty:
         st.subheader(f"📊 النتائج المتاحة ({len(search_result)} بند مدمج)")
         
-        # حساب أعلى وأقل سعر
         try:
             col_price = df.columns[3]
             prices = pd.to_numeric(search_result[col_price], errors='coerce')
@@ -143,10 +132,9 @@ if uploaded_files:
         except:
             pass 
             
-        # عرض الجدول بشكل ملموم
-        st.dataframe(search_result, use_container_width=True)
+        # 💡 التعديل السحري هنا: hide_index=True عشان يشيل العمود (0, 1, 2) ويوفر مساحة على الموبايل
+        st.dataframe(search_result, use_container_width=True, hide_index=True)
         
-        # 📥 8. زرار تحميل النتائج الـ 3D السحري
         st.write("---")
         try:
             buffer = io.BytesIO()
@@ -163,4 +151,3 @@ if uploaded_files:
             st.error(f"تعذر تجهيز ملف التحميل: {e}")
 else:
     st.info("💡 في انتظار رفع ملف أكسيل واحد أو أكثر لبدء تشغيل المنظومة...")
-    st.warning("⚠️ ملحوظة: تأكد أن جميع الملفات المرفوعة تحتوي على نفس ترتيب الأعمدة.")
