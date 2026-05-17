@@ -6,19 +6,18 @@ import os
 # 1. إعداد واجهة البرنامج وإخفاء القوائم الافتراضية لمنصات الـ Cloud
 st.set_page_config(page_title="منظومة البحث الذكي", page_icon="🔍", layout="centered")
 
-# ✨ 2. هندسة الـ CSS للألوان والخطوط وإخفاء شعارات المنصة وعمل الكارت الذهبي
+# ✨ 2. هندسة الـ CSS المتقدمة لضبط الأزرار أفقياً حتى على الموبايل
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700&display=swap');
     
-    /* ضبط الخطوط والاتجاه العربي العام */
     html, body, .stMarkdown, p, h1, h2, h3, h4, h5, h6, span, label, input, button {
         font-family: 'Cairo', sans-serif !important;
         text-align: right;
         direction: rtl !important;
     }
     
-    /* 🛑 إخفاء أيقونات جيت هاب، الثلاث نقاط، والشريط السفلي تماماً لنظافة التطبيق */
+    /* إخفاء أيقونات جيت هاب، الثلاث نقاط، والشريط السفلي تماماً لنظافة التطبيق */
     #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stDecoration"] {
         visibility: hidden !important;
         display: none !important;
@@ -38,7 +37,6 @@ st.markdown("""
         margin-bottom: 20px !important;
     }
     
-    /* تنسيق كروت الأسعار لتكون ناعمة وبجنب بعض أفقياً */
     [data-testid="stMetricValue"] {
         font-size: 16px !important;
         font-weight: 700 !important;
@@ -48,10 +46,10 @@ st.markdown("""
         font-size: 12px !important;
     }
     
-    /* تصميم كارت عرض البند الفردي باللون الأصفر الذهبي */
+    /* تصميم كارت عرض البند الفردي باللون الأصفر الذهبي الملكي */
     .gold-card {
-        background-color: #fef08a !important; /* أصفر ذهبي ناعم مريح للعين */
-        border-right: 8px solid #ca8a04 !important; /* خط ذهبي غامق جانبي */
+        background-color: #fef08a !important;
+        border-right: 8px solid #ca8a04 !important;
         padding: 15px !important;
         border-radius: 8px !important;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
@@ -80,7 +78,18 @@ st.markdown("""
         cursor: pointer;
     }
     
-    /* أزرار التنقل (التالي والسابق) باللون الرمادي الشيك */
+    /* 🌟 سحر الـ CSS: إجبار أزرار التنقل والبحث على البقاء أفقياً حتى في الشاشات الصغيرة للمحمول */
+    [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+    [data-testid="stHorizontalBlock"] > div {
+        width: auto !important;
+        flex-grow: 1 !important;
+    }
+    
     .nav-btn div.stButton > button {
         background-color: #f1f5f9 !important;
         color: #1e293b !important;
@@ -131,7 +140,6 @@ def convert_to_kashida_code(input_str):
 
 df = load_fixed_data()
 
-# تهيئة متغيرات الـ Session State لحفظ حالة التنقل بين العناصر دون إعادة تحميل
 if "current_index" not in st.session_state:
     st.session_state.current_index = 0
 if "last_query" not in st.session_state:
@@ -143,16 +151,12 @@ if not df.empty:
         ["🔍 بحث عام / بنود كهرباء (أرقام عادية أو نصوص)", "✍️ بنود كود الكشيدة (اكتب الأرقام عادية مثل 1124)"]
     )
 
-    # 🌟 التعديل المطلوب: وضع خانة البحث والزرار أفقياً في نفس السطر تماماً
-    col_input, col_btn = st.columns([4, 1])  # تقسيم السطر بنسبة 4 إلى 1
-    
+    col_input, col_btn = st.columns([4, 1])
     with col_input:
         search_query = st.text_input("✍️ أدخل كلمة البحث أو الكود هنا بدون شرط:", placeholder="مثال: 6010151 أو 1124...", label_visibility="collapsed")
-    
     with col_btn:
         search_clicked = st.button("بحث 🔍")
 
-    # تصفير العداد لو المستخدم غير كلمة البحث
     if search_query != st.session_state.last_query:
         st.session_state.current_index = 0
         st.session_state.last_query = search_query
@@ -173,7 +177,6 @@ if not df.empty:
             total_items = len(search_result)
             st.markdown(f"### 📊 النتائج المتاحة ({total_items} بند)")
             
-            # عرض أعلى وأقل سعر في سطر واحد أفقي
             try:
                 col_price = df.columns[3]
                 prices = pd.to_numeric(search_result[col_price], errors='coerce')
@@ -185,14 +188,11 @@ if not df.empty:
             except:
                 pass
 
-            # حماية العداد من تخطي الحدود
             if st.session_state.current_index >= total_items:
                 st.session_state.current_index = 0
 
-            # جلب البند الحالي لعرضه في الكارت الذهبي
             current_row = search_result.iloc[st.session_state.current_index]
             
-            # 🌟 التعديل المطلوب: عرض البند داخل كارت بلون أصفر ذهبي ملكي فاخر
             st.markdown(f"""
             <div class="gold-card">
                 <strong>📌 البند الحالي المختار ({st.session_state.current_index + 1} من {total_items}):</strong><br>
@@ -204,7 +204,6 @@ if not df.empty:
             </div>
             """, unsafe_allow_html=True)
 
-            # 🌟 التعديل المطلوب: أزرار التنقل (السابق والتالي) أفقياً تحت الكارت
             col_prev, col_next = st.columns(2)
             with col_prev:
                 st.markdown('<div class="nav-btn">', unsafe_allow_html=True)
@@ -223,7 +222,6 @@ if not df.empty:
                 st.markdown('</div>', unsafe_allow_html=True)
 
             st.write("---")
-            # عرض الجدول الكامل تحت لمن يريد النظرة الشاملة
             st.dataframe(search_result, use_container_width=True, hide_index=True)
             
             try:
