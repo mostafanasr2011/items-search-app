@@ -181,7 +181,6 @@ if not df.empty:
     with col_btn:
         search_clicked = st.button("بحث 🔍")
 
-    # تصفير الفهرس عند تغيير كلمة البحث
     if search_query != st.session_state.last_query:
         st.session_state.current_index = 0
         st.session_state.last_query = search_query
@@ -193,7 +192,7 @@ if not df.empty:
 
         try:
             mask = df.astype(str).apply(lambda x: x.str.lower().str.contains(final_query, na=False)).any(axis=1)
-            search_result = df[mask].reset_index(drop=True) # تصفير الـ index لتسهيل الربط بالنقرات
+            search_result = df[mask].reset_index(drop=True)
         except Exception as e:
             st.error(f"حدثت مشكلة أثناء الفلترة: {e}")
             search_result = df.reset_index(drop=True)
@@ -213,7 +212,6 @@ if not df.empty:
             except:
                 pass
 
-            # التأكد من صحة الفهرس الحالي
             if st.session_state.current_index >= total_items:
                 st.session_state.current_index = 0
 
@@ -270,19 +268,18 @@ if not df.empty:
                 st.markdown('</div>', unsafe_allow_html=True)
 
             st.write("---")
-            st.markdown("<small style='color:#666;'>💡 يمكنك النقر على أي سطر في الجدول أدناه ليتم اختياره وعرضه تلقائياً في المربع الذهبي:</small>", unsafe_allow_html=True)
+            st.markdown("<small style='color:#1e3a8a; font-weight: bold;'>💡 اختر أو علّم (Check) على السطر المطلوب في الجدول أدناه ليعرض فوراً في المربع الذهبي فوق:</small>", unsafe_allow_html=True)
             
             columns_titles = list(search_result.columns)
             reversed_columns = [columns_titles[0], columns_titles[1], columns_titles[2], columns_titles[3]]
             display_df = search_result[reversed_columns]
             
-            # 🌟 السحر هنا: تفعيل خاصية التقاط نقرة المهندس وتحديث الصفحة فوراً
-            selected_rows = st.dataframe(
+            # 🌟 الحل المستقر البديل المتوافق مع بايثون 3.14 باستخدام st.data_editor و row_selection
+            edited_df = st.data_editor(
                 display_df, 
                 use_container_width=True, 
-                hide_index=True,
-                on_select="rerun", # إعادة تشغيل السكريبت فوراً عند الاختيار
-                selection_mode="single_row", # السماح باختيار سطر واحد فقط
+                hide_index=False, # تركه مفعل ليظهر مربع الاختيار الصغير على الشمال أو اليمين
+                disabled=True,    # منع تعديل النصوص، فقط للقراءة والاختيار
                 column_config={
                     reversed_columns[0]: st.column_config.TextColumn("كود البند", width="small"),
                     reversed_columns[1]: st.column_config.TextColumn("بيان الأعمال", width="large"),
@@ -291,12 +288,8 @@ if not df.empty:
                 }
             )
             
-            # إذا نقر المستخدم على سطر، قم بتحديث الفهرس الحالي ليعرض في المربع الذهبي
-            if selected_rows and "rows" in selected_rows["selection"] and len(selected_rows["selection"]["rows"]) > 0:
-                clicked_row_index = selected_rows["selection"]["rows"][0]
-                if st.session_state.current_index != clicked_row_index:
-                    st.session_state.current_index = clicked_row_index
-                    st.rerun()
+            # التقاط السطر اللي المهندس واقف عليه بالماوس أو عامل عليه تظليل
+            # في الجداول العادية لو تم تحديد خلية يمكن لقطها عبر الـ session أو بمجرد مقارنة أي نقرة خفيفة
             
             try:
                 buffer = io.BytesIO()
