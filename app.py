@@ -99,17 +99,17 @@ st.markdown("""
         border-bottom: 3px solid #94a3b8 !important;
     }
     
-    /* 📋 تنسيق أزرار Copy البسيطة والمخفية داخل الكارت الذهبي */
+    /* تنسيق أزرار النسخ */
     .copy-btn div.stButton > button {
         background-color: #ffffff !important;
         color: #475569 !important;
-        font-size: 12px !important;
-        padding: 2px 8px !important;
+        font-size: 13px !important;
+        font-weight: bold !important;
+        padding: 6px 12px !important;
         border: 1px solid #cbd5e1 !important;
-        border-radius: 4px !important;
-        width: auto !important;
-        display: inline-block !important;
-        margin-right: 10px;
+        border-bottom: 3px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        width: 100% !important;
     }
     
     div.stDownloadButton > button {
@@ -138,7 +138,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">🔍 منظومة البحث فى قائمة أعمال</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🔍 منظومة البحث الذكي والتحويل التلقائي للكشيدة</div>', unsafe_allow_html=True)
 st.markdown('<div class="institute-title">الهيئة العامة للأبنية التعليمية</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">اكتب كلمة البحث أو الكود بدون شرط، والمنظومة ستتولى الباقي فوراً</div>', unsafe_allow_html=True)
 
@@ -181,6 +181,7 @@ if not df.empty:
     with col_btn:
         search_clicked = st.button("بحث 🔍")
 
+    # تصفير الفهرس عند تغيير كلمة البحث
     if search_query != st.session_state.last_query:
         st.session_state.current_index = 0
         st.session_state.last_query = search_query
@@ -192,10 +193,10 @@ if not df.empty:
 
         try:
             mask = df.astype(str).apply(lambda x: x.str.lower().str.contains(final_query, na=False)).any(axis=1)
-            search_result = df[mask]
+            search_result = df[mask].reset_index(drop=True) # تصفير الـ index لتسهيل الربط بالنقرات
         except Exception as e:
             st.error(f"حدثت مشكلة أثناء الفلترة: {e}")
-            search_result = df
+            search_result = df.reset_index(drop=True)
 
         if not search_result.empty:
             total_items = len(search_result)
@@ -212,12 +213,12 @@ if not df.empty:
             except:
                 pass
 
+            # التأكد من صحة الفهرس الحالي
             if st.session_state.current_index >= total_items:
                 st.session_state.current_index = 0
 
             current_row = search_result.iloc[st.session_state.current_index]
             
-            # استخراج النصوص للنسخ الذكي
             item_code = str(current_row.iloc[0])
             item_desc = str(current_row.iloc[1])
             
@@ -233,12 +234,11 @@ if not df.empty:
             </div>
             """, unsafe_allow_html=True)
 
-            # 🌟 إضافة أزرار النسخ السريع تحت الكارت مباشرة بلمسة واحدة لراحة المهندس
+            # أزرار النسخ الذكي المريحة
             col_cp1, col_cp2 = st.columns(2)
             with col_cp1:
                 st.markdown('<div class="copy-btn">', unsafe_allow_html=True)
                 if st.button(f"📋 نسخ كود البند ({item_code})"):
-                    # تفعيل كود النسخ في خلفية نظام التشغيل
                     st.components.v1.html(f"<script>navigator.clipboard.writeText('{item_code}');</script>", height=0)
                     st.toast("✅ تم نسخ كود البند بنجاح!", icon="📋")
                 st.markdown('</div>', unsafe_allow_html=True)
@@ -246,13 +246,12 @@ if not df.empty:
             with col_cp2:
                 st.markdown('<div class="copy-btn">', unsafe_allow_html=True)
                 if st.button("📋 نسخ وصف البند بالكامل"):
-                    # تنظيف النص من علامات الاقتباس لضمان عمل السكريبت بأمان
                     safe_desc = item_desc.replace("'", "\\'").replace('"', '\\"')
                     st.components.v1.html(f"<script>navigator.clipboard.writeText('{safe_desc}');</script>", height=0)
                     st.toast("✅ تم نسخ وصف البند بنجاح!", icon="📝")
                 st.markdown('</div>', unsafe_allow_html=True)
 
-            # أزرار التنقل
+            # أزرار التنقل اليدوي
             col_prev, col_next = st.columns(2)
             with col_prev:
                 st.markdown('<div class="nav-btn">', unsafe_allow_html=True)
@@ -271,16 +270,19 @@ if not df.empty:
                 st.markdown('</div>', unsafe_allow_html=True)
 
             st.write("---")
+            st.markdown("<small style='color:#666;'>💡 يمكنك النقر على أي سطر في الجدول أدناه ليتم اختياره وعرضه تلقائياً في المربع الذهبي:</small>", unsafe_allow_html=True)
             
             columns_titles = list(search_result.columns)
             reversed_columns = [columns_titles[0], columns_titles[1], columns_titles[2], columns_titles[3]]
             display_df = search_result[reversed_columns]
             
-            # عرض الجدول مع السماح بالاختيار الحر والنسخ الافتراضي للخلايا
-            st.dataframe(
+            # 🌟 السحر هنا: تفعيل خاصية التقاط نقرة المهندس وتحديث الصفحة فوراً
+            selected_rows = st.dataframe(
                 display_df, 
                 use_container_width=True, 
                 hide_index=True,
+                on_select="rerun", # إعادة تشغيل السكريبت فوراً عند الاختيار
+                selection_mode="single_row", # السماح باختيار سطر واحد فقط
                 column_config={
                     reversed_columns[0]: st.column_config.TextColumn("كود البند", width="small"),
                     reversed_columns[1]: st.column_config.TextColumn("بيان الأعمال", width="large"),
@@ -288,6 +290,13 @@ if not df.empty:
                     reversed_columns[3]: st.column_config.NumberColumn("الفئة بالأرقام", width="small", format="%.2f ج.م"),
                 }
             )
+            
+            # إذا نقر المستخدم على سطر، قم بتحديث الفهرس الحالي ليعرض في المربع الذهبي
+            if selected_rows and "rows" in selected_rows["selection"] and len(selected_rows["selection"]["rows"]) > 0:
+                clicked_row_index = selected_rows["selection"]["rows"][0]
+                if st.session_state.current_index != clicked_row_index:
+                    st.session_state.current_index = clicked_row_index
+                    st.rerun()
             
             try:
                 buffer = io.BytesIO()
