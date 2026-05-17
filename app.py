@@ -4,71 +4,84 @@ import io
 import os
 
 # 1. إعداد واجهة البرنامج
-st.set_page_config(page_title="منظومة البحث الذكي في البنود", page_icon="🔍", layout="centered")
+st.set_page_config(page_title="منظومة البحث الذكي", page_icon="🔍", layout="centered")
 
-# ✨ 2. لمسات الـ CSS السحرية للأزرار والخطوط والجدول العربي
+# ✨ 2. هندسة الـ CSS لتعديل مقاسات الموبايل وتنسيق الأزرار والعناوين
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700&display=swap');
     
-    html, body, [data-testid="stSidebar"], .stMarkdown, p, h1, h2, h3, h4, h5, h6, span, label, input, button {
+    html, body, .stMarkdown, p, h1, h2, h3, h4, h5, h6, span, label, input, button {
         font-family: 'Cairo', sans-serif !important;
         text-align: right;
-    }
-    
-    .block-container {
-        padding-top: 2rem !important;
-        padding-bottom: 2rem !important;
-        max-width: 900px !important;
-    }
-    
-    /* ضبط اتجاه الجداول لتكون من اليمين للشمال مخصصة للعربي */
-    [data-testid="stDataFrame"] {
         direction: rtl !important;
     }
-    
-    /* تصميم الأزرار الـ 3D الحقيقية */
+    .main-title {
+        font-size: 24px !important;
+        font-weight: 700 !important;
+        color: #1e3a8a;
+        margin-bottom: 5px !important;
+        text-align: center !important;
+    }
+    .sub-title {
+        font-size: 14px !important;
+        color: #666;
+        text-align: center !important;
+        margin-bottom: 20px !important;
+    }
+    [data-testid="stMetricValue"] {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #2e7d32 !important;
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: 13px !important;
+    }
+    div.stTextInput > div > div > input {
+        border-radius: 8px !important;
+        border: 2px solid #1e3a8a !important;
+        padding: 12px !important;
+        font-size: 16px !important;
+    }
+    div.stButton > button {
+        background-color: #1e3a8a !important;
+        color: white !important;
+        font-weight: 700 !important;
+        font-size: 16px !important;
+        padding: 10px 20px !important;
+        border-radius: 8px !important;
+        border: none !important;
+        border-bottom: 4px solid #0f172a !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+        width: 100% !important;
+        cursor: pointer;
+    }
+    div.stButton > button:active {
+        border-bottom: 1px solid #0f172a !important;
+        transform: translateY(3px) !important;
+    }
     div.stDownloadButton > button {
         background-color: #2e7d32 !important;
         color: white !important;
         font-weight: 700 !important;
-        font-size: 16px !important;
-        padding: 12px 24px !important;
+        font-size: 15px !important;
+        padding: 10px !important;
         border-radius: 8px !important;
         border: none !important;
-        border-bottom: 5px solid #1b5e20 !important; 
-        box-shadow: 0 5px 10px rgba(0,0,0,0.2) !important;
-        transition: all 0.1s ease !important;
-        width: 100%;
-        cursor: pointer;
+        border-bottom: 4px solid #1b5e20 !important;
+        width: 100% !important;
     }
-    
-    div.stDownloadButton > button:hover {
-        background-color: #338a3e !important;
-    }
-    
-    div.stDownloadButton > button:active {
-        border-bottom: 1px solid #1b5e20 !important;
-        transform: translateY(4px) !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
-    }
-    
-    div.stTextInput > div > div > input {
-        border-radius: 8px !important;
-        border: 1px solid #ccc !important;
-        padding: 10px !important;
+    [data-testid="stDataFrame"] {
+        direction: rtl !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. محتوى الواجهة الرئيسي
-st.title("🔍 منظومة البحث الذكي في بيانات البنود")
-st.write("قاعدة البيانات مدمجة وجاهزة.. اكتب كلمة البحث فوراً بدون الحاجة لرفع أي ملفات!")
+st.markdown('<div class="main-title">🔍 منظومة البحث الذكي في البنود</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">قاعدة البيانات مدمجة.. اكتب كلمة البحث واضغط على زر البحث لعرض النتائج</div>', unsafe_allow_html=True)
 
-# 📂 4. قراءة الملف الثابت تلقائياً من السيرفر مباشرة
 FILE_NAME = "data.xlsx"
 
-@st.cache_data
 def load_fixed_data():
     if os.path.exists(FILE_NAME):
         try:
@@ -77,67 +90,63 @@ def load_fixed_data():
             st.error(f"❌ حصلت مشكلة أثناء قراءة ملف البيانات: {e}")
             return pd.DataFrame()
     else:
-        st.warning(f"⚠️ تحذير: ملف البيانات الأساسي '{FILE_NAME}' غير موجود على السيرفر بعد. برجاء رفعه أولاً.")
+        st.warning(f"⚠️ تحذير: ملف البيانات الأساسي '{FILE_NAME}' غير موجود.")
         return pd.DataFrame()
 
-# تشغيل القراءة تلقائياً بدون تدخل المستخدم
 df = load_fixed_data()
 
 if not df.empty:
-    # شريط البحث الجانبي
-    st.sidebar.markdown("### 🛠️ تصفية وفلترة البحث")
-    search_query = st.sidebar.text_input("✍️ اكتب كلمة البحث هنا:", placeholder="مثال: كشاف، جوكي، متر...")
+    search_query = st.text_input("✍️ أدخل كلمة البحث أو الكود هنا:", placeholder="مثال: كشاف، كابل، حجر...")
+    search_clicked = st.button("ابحث الآن 🔍")
 
-    # الفلترة بناءً على الكلمة المكتوبة
-    if search_query:
+    if "search_active" not in st.session_state:
+        st.session_state.search_active = False
+
+    if search_clicked:
+        st.session_state.search_active = True
+
+    if st.session_state.search_active and search_query:
         try:
-            col_id = df.columns[0]     
-            col_spec = df.columns[1]   
-            col_unit = df.columns[2]   
-            col_price = df.columns[3]  
-            
-            search_result = df[
-                df[col_id].astype(str).str.contains(search_query, case=False, na=False) |
-                df[col_spec].astype(str).str.contains(search_query, case=False, na=False) |
-                df[col_unit].astype(str).str.contains(search_query, case=False, na=False) |
-                df[col_price].astype(str).str.contains(search_query, na=False)
-            ]
+            q = str(search_query).strip().lower()
+            mask = df.astype(str).apply(lambda x: x.str.lower().str.contains(q, na=False)).any(axis=1)
+            search_result = df[mask]
         except Exception as e:
             st.error(f"حدثت مشكلة أثناء الفلترة: {e}")
             search_result = df
-    else:
-        search_result = df 
 
-    # عرض النتائج والإحصائيات
-    st.subheader(f"📊 النتائج المتاحة ({len(search_result)} بند)")
-    
-    try:
-        col_price = df.columns[3]
-        prices = pd.to_numeric(search_result[col_price], errors='coerce')
+        st.markdown(f"### 📊 النتائج المتاحة ({len(search_result)} بند)")
         
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("أعلى سعر في نتائج البحث", f"{prices.max():,.2f} ج.م" if not pd.isna(prices.max()) else "N/A")
-        with col2:
-            st.metric("أقل سعر في نتائج البحث", f"{prices.min():,.2f} ج.م" if not pd.isna(prices.min()) else "N/A")
-    except:
-        pass 
-        
-    # عرض الجدول من اليمين للشمال وبدون عمود الأرقام الرخم
-    st.dataframe(search_result, use_container_width=True, hide_index=True)
-    
-    st.write("---")
-    # زر تحميل النتائج المفصلة
-    try:
-        buffer = io.BytesIO()
-        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-            search_result.to_excel(writer, index=False, sheet_name='نتائج البحث')
-        
-        st.download_button(
-            label="📥 اضغط هنا لتحميل نتائج البحث كملف Excel مدمج",
-            data=buffer.getvalue(),
-            file_name=f"نتائج_بحث_مدمجة_{search_query if search_query else 'الكل'}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-    except Exception as e:
-        st.error(f"تعذر تجهيز ملف التحميل: {e}")
+        if not search_result.empty:
+            try:
+                col_price = df.columns[3]
+                prices = pd.to_numeric(search_result[col_price], errors='coerce')
+                
+                c1, c2 = st.columns(2)
+                with c1:
+                    st.metric("أعلى سعر في البحث", f"{prices.max():,.2f} ج.م" if not pd.isna(prices.max()) else "0.00")
+                with c2:
+                    st.metric("أقل سعر في البحث", f"{prices.min():,.2f} ج.م" if not pd.isna(prices.min()) else "0.00")
+            except:
+                pass 
+                
+            st.dataframe(search_result, use_container_width=True, hide_index=True)
+            
+            try:
+                buffer = io.BytesIO()
+                with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+                    search_result.to_excel(writer, index=False, sheet_name='نتائج البحث')
+                
+                st.write("")
+                st.download_button(
+                    label="📥 تحميل هذه النتائج كملف Excel",
+                    data=buffer.getvalue(),
+                    file_name=f"نتائج_بحث_{search_query}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+            except Exception as e:
+                st.error(f"تعذر تجهيز ملف التحميل: {e}")
+        else:
+            st.info("ℹ️ لم يتم العثور على بنود تطابق كلمة البحث. جرب كلمة أخرى!")
+    else:
+        st.write("")
+        st.info("💡 الشاشة جاهزة ونظيفة.. اكتب كلمة فوق واضغط 'ابحث الآن 🔍' لإظهار البنود المطلوبة ومداها السعري.")
