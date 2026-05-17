@@ -3,69 +3,76 @@ import pandas as pd
 import io
 import os
 
-# 1. إعداد واجهة البرنامج وإخفاء القوائم الافتراضية لمنصات الـ Cloud
-st.set_page_config(page_title="منظومة البحث الذكي", page_icon="🔍", layout="centered")
+# 1. إعداد واجهة البرنامج (تم التغيير إلى layout="wide" لفرد الشاشة بالكامل)
+st.set_page_config(page_title="منظومة البحث الذكي", page_icon="🔍", layout="wide")
 
-# ✨ 2. هندسة الـ CSS المتقدمة لضبط الأزرار وإخفاء كل اللوجوهات والشريط السفلي نهائياً
+# ✨ 2. هندسة الـ CSS المتقدمة لضبط الاتجاه من اليمين للشمال وإخفاء الشعارات نهائياً
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700&display=swap');
     
-    html, body, .stMarkdown, p, h1, h2, h3, h4, h5, h6, span, label, input, button {
+    /* ضبط الخطوط والاتجاه العربي العام من اليمين للشمال */
+    html, body, .stApp, .stMarkdown, p, h1, h2, h3, h4, h5, h6, span, label, input, button {
         font-family: 'Cairo', sans-serif !important;
-        text-align: right;
+        text-align: right !important;
         direction: rtl !important;
     }
     
-    # 🛑 إخفاء أيقونات جيت هاب، الثلاث نقاط، والشريط السفلي (Footer) والعلامات المائية تماماً
-    #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stDecoration"], .viewerBadge_link__1S137, .styles_viewerBadge__3uC9V, [data-testid="bundle-footer"] {
+    /* 🛑 إبادة تامة لأيقونات جيت هاب، الثلاث نقاط، والشريط السفلي بكل مسمياتهم الجديدة */
+    #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stDecoration"], 
+    .viewerBadge_link__1S137, .styles_viewerBadge__3uC9V, [data-testid="bundle-footer"],
+    [data-testid="stStatusWidget"], .stDeployButton, [data-testid="stToolbar"] {
         visibility: hidden !important;
         display: none !important;
     }
     
-    /* منع ظهور شريط المطورين السفلي بأي شكل */
-    footer {display: none !important;}
-    [data-testid="stStatusWidget"] {display: none !important;}
+    /* تعديل الهوامش العلوية بعد حذف الشريط العلوي ليصبح التصميم متناسق */
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+        direction: rtl !important;
+    }
     
     .main-title {
-        font-size: 24px !important;
+        font-size: 26px !important;
         font-weight: 700 !important;
         color: #1e3a8a;
         margin-bottom: 2px !important;
         text-align: center !important;
     }
     .institute-title {
-        font-size: 20px !important;
+        font-size: 22px !important;
         font-weight: 600 !important;
         color: #b45309;
         margin-bottom: 8px !important;
         text-align: center !important;
     }
     .sub-title {
-        font-size: 13px !important;
+        font-size: 14px !important;
         color: #666;
         text-align: center !important;
-        margin-bottom: 20px !important;
+        margin-bottom: 25px !important;
     }
     
     [data-testid="stMetricValue"] {
-        font-size: 16px !important;
+        font-size: 18px !important;
         font-weight: 700 !important;
         color: #2e7d32 !important;
     }
     [data-testid="stMetricLabel"] {
-        font-size: 12px !important;
+        font-size: 13px !important;
     }
     
-    /* تصميم كارت عرض البند الفردي باللون الأصفر الذهبي الملكي */
+    /* كارت عرض البند الفردي باللون الأصفر الذهبي الملكي الفارد */
     .gold-card {
         background-color: #fef08a !important;
         border-right: 8px solid #ca8a04 !important;
-        padding: 15px !important;
+        padding: 20px !important;
         border-radius: 8px !important;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
-        margin-bottom: 15px !important;
+        margin-bottom: 20px !important;
         color: #1e293b !important;
+        width: 100% !important;
     }
     
     div.stTextInput > div > div > input {
@@ -75,7 +82,6 @@ st.markdown("""
         font-size: 16px !important;
     }
     
-    /* زرار البحث الأزرق */
     div.stButton > button {
         background-color: #1e3a8a !important;
         color: white !important;
@@ -86,15 +92,15 @@ st.markdown("""
         border: none !important;
         border-bottom: 4px solid #0f172a !important;
         width: 100% !important;
-        cursor: pointer;
     }
     
-    /* إجبار أزرار التنقل والبحث على البقاء أفقياً في كل الأوضاع */
+    /* محاذاة أفقية للأزرار وصندوق البحث */
     [data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
         gap: 10px !important;
+        direction: rtl !important;
     }
     [data-testid="stHorizontalBlock"] > div {
         width: auto !important;
@@ -119,7 +125,13 @@ st.markdown("""
         border-bottom: 4px solid #1b5e20 !important;
         width: 100% !important;
     }
+    
+    /* 🌟 إجبار الجدول الداخلي وعناصره على الترتيب من اليمين للشمال */
     [data-testid="stDataFrame"] {
+        direction: rtl !important;
+        text-align: right !important;
+    }
+    [data-testid="stDataFrame"] div {
         direction: rtl !important;
     }
     </style>
@@ -162,7 +174,7 @@ if not df.empty:
         ["🔍 بحث عام / بنود كهرباء (أرقام عادية أو نصوص)", "✍️ بنود كود الكشيدة (اكتب الأرقام عادية مثل 1124)"]
     )
 
-    col_input, col_btn = st.columns([4, 1])
+    col_input, col_btn = st.columns([6, 1]) # زيادة النسبة لتوسيع صندوق الإدخال مع عرض الشاشة الجديد
     with col_input:
         search_query = st.text_input("✍️ أدخل كلمة البحث أو الكود هنا بدون شرط:", placeholder="مثال: 6010151 أو 1124...", label_visibility="collapsed")
     with col_btn:
@@ -233,6 +245,8 @@ if not df.empty:
                 st.markdown('</div>', unsafe_allow_html=True)
 
             st.write("---")
+            
+            # 🌟 الجدول يعرض البيانات الآن مفصّلة وعريضة وباتجاه اليمين للشمال تماماً
             st.dataframe(search_result, use_container_width=True, hide_index=True)
             
             try:
