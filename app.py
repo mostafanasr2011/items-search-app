@@ -6,7 +6,7 @@ import os
 # 1. إعداد واجهة البرنامج وإخفاء القوائم الافتراضية لمنصات الـ Cloud
 st.set_page_config(page_title="منظومة البحث الذكي", page_icon="🔍", layout="centered")
 
-# ✨ 2. هندسة الـ CSS المتقدمة لضبط الأزرار أفقياً حتى على الموبايل
+# ✨ 2. هندسة الـ CSS المتقدمة لضبط الأزرار وإخفاء كل اللوجوهات والشريط السفلي نهائياً
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700&display=swap');
@@ -17,21 +17,32 @@ st.markdown("""
         direction: rtl !important;
     }
     
-    /* إخفاء أيقونات جيت هاب، الثلاث نقاط، والشريط السفلي تماماً لنظافة التطبيق */
-    #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stDecoration"] {
+    # 🛑 إخفاء أيقونات جيت هاب، الثلاث نقاط، والشريط السفلي (Footer) والعلامات المائية تماماً
+    #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stDecoration"], .viewerBadge_link__1S137, .styles_viewerBadge__3uC9V, [data-testid="bundle-footer"] {
         visibility: hidden !important;
         display: none !important;
     }
+    
+    /* منع ظهور شريط المطورين السفلي بأي شكل */
+    footer {display: none !important;}
+    [data-testid="stStatusWidget"] {display: none !important;}
     
     .main-title {
         font-size: 24px !important;
         font-weight: 700 !important;
         color: #1e3a8a;
-        margin-bottom: 5px !important;
+        margin-bottom: 2px !important;
+        text-align: center !important;
+    }
+    .institute-title {
+        font-size: 20px !important;
+        font-weight: 600 !important;
+        color: #b45309;
+        margin-bottom: 8px !important;
         text-align: center !important;
     }
     .sub-title {
-        font-size: 14px !important;
+        font-size: 13px !important;
         color: #666;
         text-align: center !important;
         margin-bottom: 20px !important;
@@ -78,7 +89,7 @@ st.markdown("""
         cursor: pointer;
     }
     
-    /* 🌟 سحر الـ CSS: إجبار أزرار التنقل والبحث على البقاء أفقياً حتى في الشاشات الصغيرة للمحمول */
+    /* إجبار أزرار التنقل والبحث على البقاء أفقياً في كل الأوضاع */
     [data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
@@ -114,20 +125,20 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">🔍 منظومة البحث الذكي والفحص المتتالي</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">تصميم هندسي فاخر مخصص للهواتف الذكية</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🔍 منظومة البحث فى قائمة أعمال</div>', unsafe_allow_html=True)
+st.markdown('<div class="institute-title">الهيئة العامة للأبنية التعليمية</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">اكتب كلمة البحث أو الكود بدون شرط، والمنظومة ستتولى الباقي فوراً</div>', unsafe_allow_html=True)
 
 FILE_NAME = "data.xlsx"
 
+@st.cache_data
 def load_fixed_data():
     if os.path.exists(FILE_NAME):
         try:
             return pd.read_excel(FILE_NAME)
         except Exception as e:
-            st.error(f"❌ حصلت مشكلة أثناء قراءة ملف البيانات: {e}")
             return pd.DataFrame()
     else:
-        st.warning(f"⚠️ تحذير: ملف البيانات الأساسي '{FILE_NAME}' غير موجود.")
         return pd.DataFrame()
 
 def convert_to_kashida_code(input_str):
