@@ -6,7 +6,7 @@ import os
 # 1. إعداد واجهة البرنامج على الوضع العريض
 st.set_page_config(page_title="منظومة البحث الذكي", page_icon="🔍", layout="wide")
 
-# ✨ 2. هندسة الـ CSS لإخفاء اللوجوهات تماماً وتنسيق العناصر
+# ✨ 2. هندسة الـ CSS المتقدمة ونظافة الواجهة بالكامل
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700&display=swap');
@@ -17,7 +17,7 @@ st.markdown("""
         direction: rtl !important;
     }
     
-    /* 🛑 إبادة تامة لأيقونات جيت هاب، الثلاث نقاط، والشريط السفلي */
+    /* 🛑 إخفاء أيقونات المنصة تماماً لشاشة نظيفة */
     #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stDecoration"], 
     .viewerBadge_link__1S137, .styles_viewerBadge__3uC9V, [data-testid="bundle-footer"],
     [data-testid="stStatusWidget"], .stDeployButton, [data-testid="stToolbar"] {
@@ -58,13 +58,14 @@ st.markdown("""
         color: #2e7d32 !important;
     }
     
+    /* تنسيق الكارت الذهبي الملكي */
     .gold-card {
         background-color: #fef08a !important;
         border-right: 8px solid #ca8a04 !important;
         padding: 20px !important;
         border-radius: 8px !important;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
-        margin-bottom: 20px !important;
+        margin-bottom: 15px !important;
         color: #1e293b !important;
         width: 100% !important;
     }
@@ -76,6 +77,7 @@ st.markdown("""
         font-size: 16px !important;
     }
     
+    /* زرار البحث الأزرق الرئيسي */
     div.stButton > button {
         background-color: #1e3a8a !important;
         color: white !important;
@@ -86,21 +88,28 @@ st.markdown("""
         border: none !important;
         border-bottom: 4px solid #0f172a !important;
         width: 100% !important;
+        cursor: pointer;
     }
     
-    [data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        gap: 10px !important;
-        direction: rtl !important;
-    }
-    
+    /* تنسيق أزرار التنقل */
     .nav-btn div.stButton > button {
         background-color: #f1f5f9 !important;
         color: #1e293b !important;
         border: 1px solid #cbd5e1 !important;
         border-bottom: 3px solid #94a3b8 !important;
+    }
+    
+    /* 📋 تنسيق أزرار Copy البسيطة والمخفية داخل الكارت الذهبي */
+    .copy-btn div.stButton > button {
+        background-color: #ffffff !important;
+        color: #475569 !important;
+        font-size: 12px !important;
+        padding: 2px 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 4px !important;
+        width: auto !important;
+        display: inline-block !important;
+        margin-right: 10px;
     }
     
     div.stDownloadButton > button {
@@ -115,7 +124,14 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* ضبط محاذاة نصوص الجدول الداخلي لليمين */
+    [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 10px !important;
+        direction: rtl !important;
+    }
+    
     [data-testid="stDataFrame"] {
         direction: rtl !important;
     }
@@ -201,17 +217,42 @@ if not df.empty:
 
             current_row = search_result.iloc[st.session_state.current_index]
             
+            # استخراج النصوص للنسخ الذكي
+            item_code = str(current_row.iloc[0])
+            item_desc = str(current_row.iloc[1])
+            
+            # عرض الكارت الذهبي الملكي
             st.markdown(f"""
             <div class="gold-card">
                 <strong>📌 البند الحالي المختار ({st.session_state.current_index + 1} من {total_items}):</strong><br>
                 <hr style="margin: 8px 0; border: 0; border-top: 1px solid #e2e8f0;">
-                • <b>كود البند:</b> {current_row.iloc[0]}<br>
-                • <b>وصف البند:</b> {current_row.iloc[1]}<br>
+                • <b>كود البند:</b> {item_code}<br>
+                • <b>وصف البند:</b> {item_desc}<br>
                 • <b>الفئة/الوحدة:</b> {current_row.iloc[2]}<br>
                 • <b>السعر:</b> <span style="color:#b45309; font-weight:bold;">{current_row.iloc[3]} ج.م</span>
             </div>
             """, unsafe_allow_html=True)
 
+            # 🌟 إضافة أزرار النسخ السريع تحت الكارت مباشرة بلمسة واحدة لراحة المهندس
+            col_cp1, col_cp2 = st.columns(2)
+            with col_cp1:
+                st.markdown('<div class="copy-btn">', unsafe_allow_html=True)
+                if st.button(f"📋 نسخ كود البند ({item_code})"):
+                    # تفعيل كود النسخ في خلفية نظام التشغيل
+                    st.components.v1.html(f"<script>navigator.clipboard.writeText('{item_code}');</script>", height=0)
+                    st.toast("✅ تم نسخ كود البند بنجاح!", icon="📋")
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+            with col_cp2:
+                st.markdown('<div class="copy-btn">', unsafe_allow_html=True)
+                if st.button("📋 نسخ وصف البند بالكامل"):
+                    # تنظيف النص من علامات الاقتباس لضمان عمل السكريبت بأمان
+                    safe_desc = item_desc.replace("'", "\\'").replace('"', '\\"')
+                    st.components.v1.html(f"<script>navigator.clipboard.writeText('{safe_desc}');</script>", height=0)
+                    st.toast("✅ تم نسخ وصف البند بنجاح!", icon="📝")
+                st.markdown('</div>', unsafe_allow_html=True)
+
+            # أزرار التنقل
             col_prev, col_next = st.columns(2)
             with col_prev:
                 st.markdown('<div class="nav-btn">', unsafe_allow_html=True)
@@ -231,19 +272,18 @@ if not df.empty:
 
             st.write("---")
             
-            # 🌟 هندسة برمجية للجدول: إعادة ترتيب الأعمدة من اليمين للشمال + تثبيت وضبط الأحجام التلقائية
             columns_titles = list(search_result.columns)
-            # قلب الترتيب ليكون (الكود، ثم البيان، ثم الوحدة، ثم السعر) من اليمين
             reversed_columns = [columns_titles[0], columns_titles[1], columns_titles[2], columns_titles[3]]
             display_df = search_result[reversed_columns]
             
+            # عرض الجدول مع السماح بالاختيار الحر والنسخ الافتراضي للخلايا
             st.dataframe(
                 display_df, 
                 use_container_width=True, 
                 hide_index=True,
                 column_config={
                     reversed_columns[0]: st.column_config.TextColumn("كود البند", width="small"),
-                    reversed_columns[1]: st.column_config.TextColumn("بيان الأعمال", width="large"), # فرد عمود الكلام لمنع صغره
+                    reversed_columns[1]: st.column_config.TextColumn("بيان الأعمال", width="large"),
                     reversed_columns[2]: st.column_config.TextColumn("الوحدة", width="small"),
                     reversed_columns[3]: st.column_config.NumberColumn("الفئة بالأرقام", width="small", format="%.2f ج.م"),
                 }
