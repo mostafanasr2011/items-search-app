@@ -1,11 +1,12 @@
 import streamlit as st
 import pandas as pd
 import io
+import os
 
 # 1. إعداد واجهة البرنامج
 st.set_page_config(page_title="منظومة البحث الذكي في البنود", page_icon="🔍", layout="centered")
 
-# ✨ 2. لمسات الـ CSS السحرية للأزرار والخطوط والجدول
+# ✨ 2. لمسات الـ CSS السحرية للأزرار والخطوط والجدول العربي
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
@@ -19,12 +20,6 @@ st.markdown("""
         padding-top: 2rem !important;
         padding-bottom: 2rem !important;
         max-width: 900px !important;
-    }
-    
-    [data-testid="stFileUploadDropzone"] {
-        border: 2px dashed #3f51b5 !important;
-        background-color: #f5f7ff;
-        border-radius: 12px;
     }
     
     /* ضبط اتجاه الجداول لتكون من اليمين للشمال مخصصة للعربي */
@@ -68,36 +63,33 @@ st.markdown("""
 
 # 3. محتوى الواجهة الرئيسي
 st.title("🔍 منظومة البحث الذكي في بيانات البنود")
-st.write("ارفع ملف أو عدة ملفات أكسيل معاً، وابحث في آلاف الصفوف المدمجة فوراً!")
+st.write("قاعدة البيانات مدمجة وجاهزة.. اكتب كلمة البحث فوراً بدون الحاجة لرفع أي ملفات!")
 
-# 4. أداة رفع الملفات
-uploaded_files = st.file_uploader(
-    "📂 اسحب وأفلت ملفات الأكسيل هنا (يمكنك اختيار أكثر من ملف معاً):", 
-    type=["xlsx", "xls", "csv"],
-    accept_multiple_files=True
-)
+# 📂 4. قراءة الملف الثابت تلقائياً من السيرفر مباشرة
+FILE_NAME = "data.xlsx"
 
 @st.cache_data
-def load_and_combine_data(files_list):
-    combined_df = pd.DataFrame()
-    for file in files_list:
+def load_fixed_data():
+    if os.path.exists(FILE_NAME):
         try:
-            if file.name.endswith('.csv'):
-                current_df = pd.read_csv(file)
-            else:
-                current_df = pd.read_excel(file)
-            combined_df = pd.concat([combined_df, current_df], ignore_index=True)
+            return pd.read_excel(FILE_NAME)
         except Exception as e:
-            st.error(f"❌ حصلت مشكلة في ملف {file.name}: {e}")
-    return combined_df
+            st.error(f"❌ حصلت مشكلة أثناء قراءة ملف البيانات: {e}")
+            return pd.DataFrame()
+    else:
+        st.warning(f"⚠️ تحذير: ملف البيانات الأساسي '{FILE_NAME}' غير موجود على السيرفر بعد. برجاء رفعه أولاً.")
+        return pd.DataFrame()
 
-if uploaded_files:
-    df = load_and_combine_data(uploaded_files)
-    
+# تشغيل القراءة تلقائياً بدون تدخل المستخدم
+df = load_fixed_data()
+
+if not df.empty:
+    # شريط البحث الجانبي
     st.sidebar.markdown("### 🛠️ تصفية وفلترة البحث")
     search_query = st.sidebar.text_input("✍️ اكتب كلمة البحث هنا:", placeholder="مثال: كشاف، جوكي، متر...")
 
-    if not df.empty and search_query:
+    # الفلترة بناءً على الكلمة المكتوبة
+    if search_query:
         try:
             col_id = df.columns[0]     
             col_spec = df.columns[1]   
@@ -116,37 +108,36 @@ if uploaded_files:
     else:
         search_result = df 
 
-    if not df.empty:
-        st.subheader(f"📊 النتائج المتاحة ({len(search_result)} بند مدمج)")
+    # عرض النتائج والإحصائيات
+    st.subheader(f"📊 النتائج المتاحة ({len(search_result)} بند)")
+    
+    try:
+        col_price = df.columns[3]
+        prices = pd.to_numeric(search_result[col_price], errors='coerce')
         
-        try:
-            col_price = df.columns[3]
-            prices = pd.to_numeric(search_result[col_price], errors='coerce')
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("أعلى سعر في نتائج البحث", f"{prices.max():,.2f} ج.م" if not pd.isna(prices.max()) else "N/A")
-            with col2:
-                st.metric("أقل سعر في نتائج البحث", f"{prices.min():,.2f} ج.م" if not pd.isna(prices.min()) else "N/A")
-        except:
-            pass 
-            
-        # 💡 التعديل السحري هنا: hide_index=True عشان يشيل العمود (0, 1, 2) ويوفر مساحة على الموبايل
-        st.dataframe(search_result, use_container_width=True, hide_index=True)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("أعلى سعر في نتائج البحث", f"{prices.max():,.2f} ج.م" if not pd.isna(prices.max()) else "N/A")
+        with col2:
+            st.metric("أقل سعر في نتائج البحث", f"{prices.min():,.2f} ج.م" if not pd.isna(prices.min()) else "N/A")
+    except:
+        pass 
         
-        st.write("---")
-        try:
-            buffer = io.BytesIO()
-            with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-                search_result.to_excel(writer, index=False, sheet_name='نتائج البحث')
-            
-            st.download_button(
-                label="📥 اضغط هنا لتحميل نتائج البحث كملف Excel مدمج",
-                data=buffer.getvalue(),
-                file_name=f"نتائج_بحث_مدمجة_{search_query if search_query else 'الكل'}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-        except Exception as e:
-            st.error(f"تعذر تجهيز ملف التحميل: {e}")
-else:
-    st.info("💡 في انتظار رفع ملف أكسيل واحد أو أكثر لبدء تشغيل المنظومة...")
+    # عرض الجدول من اليمين للشمال وبدون عمود الأرقام الرخم
+    st.dataframe(search_result, use_container_width=True, hide_index=True)
+    
+    st.write("---")
+    # زر تحميل النتائج المفصلة
+    try:
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+            search_result.to_excel(writer, index=False, sheet_name='نتائج البحث')
+        
+        st.download_button(
+            label="📥 اضغط هنا لتحميل نتائج البحث كملف Excel مدمج",
+            data=buffer.getvalue(),
+            file_name=f"نتائج_بحث_مدمجة_{search_query if search_query else 'الكل'}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    except Exception as e:
+        st.error(f"تعذر تجهيز ملف التحميل: {e}")
