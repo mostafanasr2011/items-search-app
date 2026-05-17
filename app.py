@@ -3,22 +3,21 @@ import pandas as pd
 import io
 import os
 
-# 1. إعداد واجهة البرنامج (تم التغيير إلى layout="wide" لفرد الشاشة بالكامل)
+# 1. إعداد واجهة البرنامج على الوضع العريض
 st.set_page_config(page_title="منظومة البحث الذكي", page_icon="🔍", layout="wide")
 
-# ✨ 2. هندسة الـ CSS المتقدمة لضبط الاتجاه من اليمين للشمال وإخفاء الشعارات نهائياً
+# ✨ 2. هندسة الـ CSS لإخفاء اللوجوهات تماماً وتنسيق العناصر
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700&display=swap');
     
-    /* ضبط الخطوط والاتجاه العربي العام من اليمين للشمال */
     html, body, .stApp, .stMarkdown, p, h1, h2, h3, h4, h5, h6, span, label, input, button {
         font-family: 'Cairo', sans-serif !important;
         text-align: right !important;
         direction: rtl !important;
     }
     
-    /* 🛑 إبادة تامة لأيقونات جيت هاب، الثلاث نقاط، والشريط السفلي بكل مسمياتهم الجديدة */
+    /* 🛑 إبادة تامة لأيقونات جيت هاب، الثلاث نقاط، والشريط السفلي */
     #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stDecoration"], 
     .viewerBadge_link__1S137, .styles_viewerBadge__3uC9V, [data-testid="bundle-footer"],
     [data-testid="stStatusWidget"], .stDeployButton, [data-testid="stToolbar"] {
@@ -26,7 +25,6 @@ st.markdown("""
         display: none !important;
     }
     
-    /* تعديل الهوامش العلوية بعد حذف الشريط العلوي ليصبح التصميم متناسق */
     .block-container {
         padding-top: 2rem !important;
         padding-bottom: 2rem !important;
@@ -59,11 +57,7 @@ st.markdown("""
         font-weight: 700 !important;
         color: #2e7d32 !important;
     }
-    [data-testid="stMetricLabel"] {
-        font-size: 13px !important;
-    }
     
-    /* كارت عرض البند الفردي باللون الأصفر الذهبي الملكي الفارد */
     .gold-card {
         background-color: #fef08a !important;
         border-right: 8px solid #ca8a04 !important;
@@ -94,17 +88,12 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* محاذاة أفقية للأزرار وصندوق البحث */
     [data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
         gap: 10px !important;
         direction: rtl !important;
-    }
-    [data-testid="stHorizontalBlock"] > div {
-        width: auto !important;
-        flex-grow: 1 !important;
     }
     
     .nav-btn div.stButton > button {
@@ -126,12 +115,8 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* 🌟 إجبار الجدول الداخلي وعناصره على الترتيب من اليمين للشمال */
+    /* ضبط محاذاة نصوص الجدول الداخلي لليمين */
     [data-testid="stDataFrame"] {
-        direction: rtl !important;
-        text-align: right !important;
-    }
-    [data-testid="stDataFrame"] div {
         direction: rtl !important;
     }
     </style>
@@ -174,7 +159,7 @@ if not df.empty:
         ["🔍 بحث عام / بنود كهرباء (أرقام عادية أو نصوص)", "✍️ بنود كود الكشيدة (اكتب الأرقام عادية مثل 1124)"]
     )
 
-    col_input, col_btn = st.columns([6, 1]) # زيادة النسبة لتوسيع صندوق الإدخال مع عرض الشاشة الجديد
+    col_input, col_btn = st.columns([6, 1])
     with col_input:
         search_query = st.text_input("✍️ أدخل كلمة البحث أو الكود هنا بدون شرط:", placeholder="مثال: 6010151 أو 1124...", label_visibility="collapsed")
     with col_btn:
@@ -246,8 +231,23 @@ if not df.empty:
 
             st.write("---")
             
-            # 🌟 الجدول يعرض البيانات الآن مفصّلة وعريضة وباتجاه اليمين للشمال تماماً
-            st.dataframe(search_result, use_container_width=True, hide_index=True)
+            # 🌟 هندسة برمجية للجدول: إعادة ترتيب الأعمدة من اليمين للشمال + تثبيت وضبط الأحجام التلقائية
+            columns_titles = list(search_result.columns)
+            # قلب الترتيب ليكون (الكود، ثم البيان، ثم الوحدة، ثم السعر) من اليمين
+            reversed_columns = [columns_titles[0], columns_titles[1], columns_titles[2], columns_titles[3]]
+            display_df = search_result[reversed_columns]
+            
+            st.dataframe(
+                display_df, 
+                use_container_width=True, 
+                hide_index=True,
+                column_config={
+                    reversed_columns[0]: st.column_config.TextColumn("كود البند", width="small"),
+                    reversed_columns[1]: st.column_config.TextColumn("بيان الأعمال", width="large"), # فرد عمود الكلام لمنع صغره
+                    reversed_columns[2]: st.column_config.TextColumn("الوحدة", width="small"),
+                    reversed_columns[3]: st.column_config.NumberColumn("الفئة بالأرقام", width="small", format="%.2f ج.م"),
+                }
+            )
             
             try:
                 buffer = io.BytesIO()
