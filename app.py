@@ -212,8 +212,24 @@ if not df.empty:
             except:
                 pass
 
+            # 🌟 إضافة ميزة الانتقال المباشر عبر Dropdown أمن ومستقر جداً وينفذ فكرتك
+            item_options = [f"بند {i+1} : كود ({search_result.iloc[i].iloc[0]})" for i in range(total_items)]
+            
+            # التأكد من صحة الفهرس الحالي
             if st.session_state.current_index >= total_items:
                 st.session_state.current_index = 0
+                
+            selected_option = st.selectbox(
+                "🎯 اختر البند مباشرة من هنا للعرض السريع في الكارت:",
+                options=item_options,
+                index=st.session_state.current_index
+            )
+            
+            # تحديث الفهرس بناءً على اختيار القائمة
+            chosen_index = item_options.index(selected_option)
+            if chosen_index != st.session_state.current_index:
+                st.session_state.current_index = chosen_index
+                st.rerun()
 
             current_row = search_result.iloc[st.session_state.current_index]
             
@@ -268,28 +284,17 @@ if not df.empty:
                 st.markdown('</div>', unsafe_allow_html=True)
 
             st.write("---")
-            st.markdown("<small style='color:#1e3a8a; font-weight: bold;'>💡 اختر أو علّم (Check) على السطر المطلوب في الجدول أدناه ليعرض فوراً في المربع الذهبي فوق:</small>", unsafe_allow_html=True)
             
             columns_titles = list(search_result.columns)
             reversed_columns = [columns_titles[0], columns_titles[1], columns_titles[2], columns_titles[3]]
             display_df = search_result[reversed_columns]
             
-            # 🌟 الحل المستقر البديل المتوافق مع بايثون 3.14 باستخدام st.data_editor و row_selection
-            edited_df = st.data_editor(
+            # العودة للجدول المستقر والآمن تمااااماً لعرض البيانات بكامل الشاشة وبدون أخطاء
+            st.dataframe(
                 display_df, 
                 use_container_width=True, 
-                hide_index=False, # تركه مفعل ليظهر مربع الاختيار الصغير على الشمال أو اليمين
-                disabled=True,    # منع تعديل النصوص، فقط للقراءة والاختيار
-                column_config={
-                    reversed_columns[0]: st.column_config.TextColumn("كود البند", width="small"),
-                    reversed_columns[1]: st.column_config.TextColumn("بيان الأعمال", width="large"),
-                    reversed_columns[2]: st.column_config.TextColumn("الوحدة", width="small"),
-                    reversed_columns[3]: st.column_config.NumberColumn("الفئة بالأرقام", width="small", format="%.2f ج.م"),
-                }
+                hide_index=True
             )
-            
-            # التقاط السطر اللي المهندس واقف عليه بالماوس أو عامل عليه تظليل
-            # في الجداول العادية لو تم تحديد خلية يمكن لقطها عبر الـ session أو بمجرد مقارنة أي نقرة خفيفة
             
             try:
                 buffer = io.BytesIO()
