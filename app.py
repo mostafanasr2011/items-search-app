@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ✨ 2. الشخلعة الهندسية: باليتة ألوان جوجل + عمق ثلاثي الأبعاد فائق (Deep 3D)
+# ✨ 2. الشخلعة الهندسية: باليتة ألوان جوجل + عمق ثلاثي الأبعاد فائق + تكبير أزرار الصواريخ
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700;900&display=swap');
@@ -52,17 +52,15 @@ st.markdown("""
     .card-3d-deep {
         background: #ffffff;
         border-radius: 20px;
-        /* ظلال مزدوجة لخلق عمق وبروز حقيقي على الشاشة */
         box-shadow: 12px 12px 25px rgba(0, 0, 0, 0.12), 
                     -8px -8px 20px rgba(255, 255, 255, 0.9),
                     inset 1px 1px 0px rgba(255, 255, 255, 0.6);
         padding: 30px;
-        margin-bottom: 25px;
+        margin-bottom: 15px;
         transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         border: 1px solid rgba(0,0,0,0.03);
     }
     
-    /* تأثير الضغط والبروز الإضافي عند مرور الماوس */
     .card-3d-deep:hover {
         transform: translateY(-8px);
         box-shadow: 20px 20px 35px rgba(0, 0, 0, 0.16), 
@@ -81,6 +79,22 @@ st.markdown("""
         filter: drop-shadow(4px 6px 8px rgba(0,0,0,0.15));
     }
     
+    /* 🚀 تكبير وهندسة أزرار الصواريخ لتكون واضحة وعملاقة */
+    div.stButton > button {
+        font-size: 20px !important;
+        font-weight: 700 !important;
+        padding: 15px 30px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    /* تأثير تفاعلي إضافي عند مرور الماوس على أزرار التنقل والصواريخ */
+    div.stButton > button:hover {
+        transform: scale(1.02) !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+    }
+
     /* تنسيق كروت المساعدة الموسعة */
     .help-box {
         background: #f8f9fa;
@@ -105,7 +119,7 @@ st.markdown("""
 st.markdown('<h1 class="main-header-title">⚡ المنظومة الذكية لتسعير وبحوث بنود الكهرباء</h1>', unsafe_allow_html=True)
 st.markdown('<p class="main-subtitle">تحت إشراف وتطوير المهندس مصطفى نصر &copy; ٢٠٢٦</p>', unsafe_allow_html=True)
 
-# 🌐 4. شريط الأزرار العلوي (تحديث ألوان وتصميم الأزرار)
+# 🌐 4. شريط الأزرار العلوي للتحكم السريع
 st.markdown("<h4 style='text-align: center; color: #202124; margin-bottom: 15px;'>🌐 لوحة التحكم السريع للمنظومة</h4>", unsafe_allow_html=True)
 col_nav1, col_nav2, col_nav3, col_nav4, col_nav5 = st.columns([1.2, 2, 2, 2, 1.2])
 
@@ -135,7 +149,7 @@ with col_nav5:
 
 st.markdown("---")
 
-# دالة مساعدة لتشغيل الأكواد
+# دالة مسابعة لتشغيل الأكواد
 def run_sub_page(file_path):
     if os.path.exists(file_path):
         try:
@@ -159,80 +173,10 @@ if st.session_state.current_page == "main":
         <p style="color: #5f6368; font-size: 15px;">البحث الفوري والذكي في كافة بنود مقايسة الكهرباء بمجرد كتابة كلمة أو كود، مع خاصية استخراج ملفات وتصنيفات إكسيل فورية وجاهزة للمراجعة.</p>
     </div>
     """, unsafe_allow_html=True)
-    if st.button("🚀 فتح محرك البحث العام", key="btn_go_search", use_container_width=True):
+    if st.button("🚀 فتح محرك البحث العام الشامل", key="btn_go_search", use_container_width=True):
         st.session_state.current_page = "search"
         st.rerun()
 
     # كارت 2 - أخضر جوجل
     st.markdown("""
-    <div class="card-3d-deep google-green">
-        <span class="icon-3d">🎛️</span>
-        <h3 style="color: #34A853; font-weight: 700;">🔌 2. صفحة مهندس اللوحات الكهربائية</h3>
-        <p style="color: #5f6368; font-size: 15px;">الفلترة الفنية والهندسية الدقيقة المخصصة لوصف وجداول لوحات التوزيع والقدرة بناءً على سعة القاطع، الأمبير، درجة الحماية IP ونظام الأطوار (Phase).</p>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("🚀 فتح صفحة مهندس اللوحات", key="btn_go_panels", use_container_width=True):
-        st.session_state.current_page = "panels"
-        st.rerun()
-
-    # كارت 3 - أصفر جوجل
-    st.markdown("""
-    <div class="card-3d-deep google-yellow">
-        <span class="icon-3d">📊</span>
-        <h3 style="color: #FBBC05; font-weight: 700;">🌳 3. التصفح الهرمي والمقارنة الذكية</h3>
-        <p style="color: #5f6368; font-size: 15px;">استكشاف شجري منظم للمجموعات الكهربائية الكبرى وفروعها وتوصيفها السريع، لفهم وتتبع الفروق السعرية بين البنود المتشابهة بالسوق المحلي.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("🚀 فتح التصفح الهرمي", key="btn_go_tree", use_container_width=True):
-        st.session_state.current_page = "tree"
-        st.rerun()
-
-elif st.session_state.current_page == "search":
-    run_sub_page("pages/search.py")
-
-elif st.session_state.current_page == "panels":
-    run_sub_page("pages/2_⚡_مهندس_اللوحات.py")
-
-elif st.session_state.current_page == "tree":
-    run_sub_page("pages/3_🌳_التصفح_الهرمي.py")
-
-# 💡 توسيع قسم الـ HELP بشكل تفصيلي احترافي - أحمر جوجل
-elif st.session_state.current_page == "help":
-    st.markdown("""
-    <div class="card-3d-deep google-red">
-        <span class="icon-3d">ℹ️</span>
-        <h2 style="color: #EA4335; font-weight: 700;">💡 دليل المساعدة والدعم الفني للمنظومة</h2>
-        <p style="color: #5f6368;">أهلاً بك يا هندسة في دليل الاستخدام السريع وتوضيح آليات عمل الأقسام.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("<h3 style='color:#202124;'>🛠️ كيف تستخدم المنظومة بكفاءة؟</h3>", unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="help-box" style="border-left-color: #4285F4;">
-        <h4>🔍 أولاً: محرك البحث العام والسريع</h4>
-        <p>صندوق البحث يدعم البحث الجزئي والكلي. يمكنك كتابة كود البند مباشرة (مثال: <b>6010</b>) أو كتابة كلمات مفتاحية مثل (<b>كابل، كشاف، لوحة</b>). بمجرد ظهور الجدول، يمكنك الضغط على زر التحميل الأخضر لحفظ النتيجة في ملف إكسيل فوري على جهازك.</p>
-    </div>
-    
-    <div class="help-box" style="border-left-color: #34A853;">
-        <h4>🔌 ثانياً: صفحة مهندس اللوحات الكهربائية</h4>
-        <p>هذه الصفحة مخصصة لعزل وفصل بنود اللوحات فقط عن باقي المقايسة. تتيح لك اختيار سعة القواطع والأمبير المطلوبة ودرجة حماية الغلاف وعرض البنود المتوافقة مع مخططاتك الهندسية بدقة.</p>
-    </div>
-    
-    <div class="help-box" style="border-left-color: #FBBC05;">
-        <h4>🌳 ثالثاً: التصفح الهرمي والمقارنة الذكية</h4>
-        <p>إذا كنت تريد دراسة السوق أو مقارنة أسعار بنود متشابهة، يتيح لك هذا القسم اختيار المجموعة الرئيسية (مثل: أنظمة الإنارة) ثم تصفح الفروع تدريجياً لترى الفروق السعرية والمواصفات الفنية الموازية.</p>
-    </div>
-    
-    <div class="help-box" style="border-left-color: #EA4335;">
-        <h4>🏠 العودة والتنقل</h4>
-        <p>النظام يعتمد بالكامل على <b>لوحة التحكم السريع (الشريط العلوي الأزرق والألوان)</b>. للرجوع إلى الشاشة الرئيسية لعرض الكروت في أي وقت، اضغط على زر <b>🏠 HOME</b> المثبت في الأعلى.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-# 👤 6. فريق الإعداد والتطوير الرسمي (المهندس مصطفى نصر)
-st.markdown("""
-    <div class="footer-credits">
-        🛠️ <b>فريق الإعداد والتطوير:</b> تم التصميم والتطوير والإشراف الهندسي الكامل بواسطة <b>المهندس مصطفى نصر</b> &copy; ٢٠٢٦
-    </div>
-""", unsafe_allow_html=True)
+    <div class="card-3d-deep google-green
