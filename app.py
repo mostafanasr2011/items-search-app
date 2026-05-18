@@ -3,214 +3,174 @@ import pandas as pd
 import io
 import os
 
-# ✨ هندسة الـ CSS الخاصة بصفحة البحث لتطابق الهوية البصرية ثلاثية الأبعاد وبخطوط عملاقة
+# 1. إعداد واجهة المنظومة وإخفاء السايد بار تماماً
+st.set_page_config(
+    page_title="منظومة الهندسة الكهربائية الذكية", 
+    page_icon="⚡", 
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# ✨ 2. هندسة الـ CSS الموحدة: باليتة ألوان جوجل + عمق ثلاثي الأبعاد + خطوط عملاقة لكل الصفحات
 st.markdown("""
     <style>
-    /* الكارت ثلاثي الأبعاد المطور للمربع الملكي */
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700;900&display=swap');
+    
+    html, body, .stApp, .stMarkdown, p, h1, h2, h3, h4, h5, h6, span, label, input, button, select {
+        font-family: 'Cairo', sans-serif !important;
+        text-align: right !important;
+        direction: rtl !important;
+    }
+    
+    /* إخفاء السايد بار والعلائم الافتراضية تماماً */
+    [data-testid="stSidebar"], .viewerBadge_link__1S137, .styles_viewerBadge__3uC9V, [data-testid="bundle-footer"], footer {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    .block-container { padding-top: 1rem !important; }
+
+    /* عنوان المنظومة الكبير بألوان جوجل */
+    .main-header-title {
+        background: linear-gradient(45deg, #4285F4, #34A853, #FBBC05, #EA4335);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 42px !important;
+        font-weight: 900;
+        text-align: center !important;
+        margin-bottom: 5px;
+    }
+    
+    .main-subtitle {
+        text-align: center !important;
+        font-size: 18px;
+        color: #5f6368;
+        margin-bottom: 25px;
+    }
+
+    /* 💎 كروت 3D عميقة وفخمة */
+    .card-3d-deep {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 12px 12px 25px rgba(0, 0, 0, 0.12), -8px -8px 20px rgba(255, 255, 255, 0.9);
+        padding: 25px 30px;
+        margin-bottom: 15px;
+        transition: all 0.4s ease;
+        border: 1px solid rgba(0,0,0,0.02);
+    }
+    
+    .card-3d-deep:hover {
+        transform: translateY(-6px);
+        box-shadow: 20px 20px 35px rgba(0, 0, 0, 0.16), -12px -12px 25px rgba(255, 255, 255, 1);
+    }
+
+    /* المربع الملكي المطور داخل صفحة البحث */
     .gold-card-3d {
         background: #ffffff;
         border-radius: 20px;
-        box-shadow: 12px 12px 25px rgba(0, 0, 0, 0.12), 
-                    -8px -8px 20px rgba(255, 255, 255, 0.9);
+        box-shadow: 12px 12px 25px rgba(0, 0, 0, 0.12), -8px -8px 20px rgba(255, 255, 255, 0.9);
         padding: 30px;
         margin-top: 20px;
         margin-bottom: 20px;
-        border-right: 12px solid #FBBC05; /* أصفر جوجل الملوكي */
-        direction: rtl !important;
-        text-align: right !important;
+        border-right: 12px solid #FBBC05;
     }
-    .gold-card-3d h3 {
-        color: #B07D00 !important;
-        font-weight: 900 !important;
-        font-size: 26px !important;
-        margin-bottom: 15px;
-    }
-    .gold-card-3d p {
-        font-size: 19px !important;
-        font-weight: 600 !important;
-        line-height: 1.9 !important;
-        color: #202124 !important;
-    }
+    .gold-card-3d h3 { color: #B07D00 !important; font-weight: 900 !important; font-size: 26px !important; }
+    .gold-card-3d p { font-size: 19px !important; font-weight: 600 !important; line-height: 1.9 !important; color: #202124 !important; }
+
+    /* تلوين الكروت بباليتة جوجل */
+    .google-blue { border-right: 12px solid #4285F4; }
+    .google-green { border-right: 12px solid #34A853; }
+    .google-yellow { border-right: 12px solid #FBBC05; }
+    .google-red { border-right: 12px solid #EA4335; }
+
+    .icon-3d { font-size: 48px; float: left; filter: drop-shadow(4px 6px 8px rgba(0,0,0,0.15)); margin-top: -5px; }
     
-    /* تكبير وتوضيح أزرار التنقل والنسخ */
+    /* 🚀 أزرار الصواريخ والتنقل العملاقة */
     div.stButton > button {
-        font-size: 18px !important;
+        font-size: 22px !important;
         font-weight: 700 !important;
-        border-radius: 10px !important;
-        padding: 10px 15px !important;
+        padding: 14px 30px !important;
+        border-radius: 14px !important;
+        box-shadow: 0 5px 18px rgba(0,0,0,0.12) !important;
+        transition: all 0.3s ease !important;
     }
-    
-    /* ستايل مخصص لأزرار النسخ الذكي لتبدو رشيقة ومميزة */
-    .copy-section button {
-        background-color: #f8f9fa !important;
-        color: #1a73e8 !important;
-        border: 1px solid #dadce0 !important;
-    }
+    div.stButton > button:hover { transform: scale(1.015) !important; box-shadow: 0 8px 25px rgba(0,0,0,0.18) !important; }
+
+    /* أزرار التنقل الفرعية (السابق والتالي) */
+    .nav-btn div.stButton > button { background-color: #f1f5f9 !important; color: #1e293b !important; font-size: 18px !important; }
+
+    .help-box { background: #f8f9fa; border-radius: 14px; padding: 20px; margin-bottom: 18px; border-left: 6px solid #4285F4; font-size: 16px; }
+    .footer-credits { text-align: center !important; font-size: 16px; color: #3c4043; font-weight: 600; margin-top: 60px; padding: 25px; border-top: 2px dashed #dadce0; background: #f8f9fa; border-radius: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h2 style='color: #4285F4; font-weight: 900;'>🔍 محرك البحث العام الذكي وتطويع الكشيدة</h2>", unsafe_allow_html=True)
-st.markdown("<p style='font-size: 16px; color:#5f6368;'>اكتب كلمة البحث أو الكود بدون شرط، والمنظومة ستتولى الباقي فوراً وتحلل البنود</p>", unsafe_allow_html=True)
+# 🏢 3. اسم المنظومة الثابت
+st.markdown('<h1 class="main-header-title">⚡ المنظومة الذكية لتسعير وبحوث بنود الكهرباء</h1>', unsafe_allow_html=True)
+st.markdown('<p class="main-subtitle">الهيئة العامة للأبنية التعليمية | الإشراف الفني: المهندس مصطفى نصر &copy; ٢٠٢٦</p>', unsafe_allow_html=True)
 
-FILE_NAME = "data.xlsx"
+# 🌐 4. شريط التحكم السريع العلوي الألوان
+st.markdown("<h4 style='text-align: center; color: #202124; margin-bottom: 15px; font-weight:700;'>🌐 لوحة التحكم السريع للمنظومة</h4>", unsafe_allow_html=True)
+col_nav1, col_nav2, col_nav3, col_nav4, col_nav5 = st.columns([1.2, 2, 2, 2, 1.2])
 
-@st.cache_data
-def load_fixed_data():
-    if os.path.exists(FILE_NAME):
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "main"
+
+with col_nav1:
+    if st.button("🏠 HOME", key="nav_home", use_container_width=True): st.session_state.current_page = "main"; st.rerun()
+with col_nav2:
+    if st.button("🔍 1. محرك البحث العام", key="nav_search", use_container_width=True): st.session_state.current_page = "search"; st.rerun()
+with col_nav3:
+    if st.button("🔌 2. صفحة مهندس اللوحات", key="nav_panels", use_container_width=True): st.session_state.current_page = "panels"; st.rerun()
+with col_nav4:
+    if st.button("🌳 3. التصفح الهرمي", key="nav_tree", use_container_width=True): st.session_state.current_page = "tree"; st.rerun()
+with col_nav5:
+    if st.button("💡 HELP", key="nav_help", use_container_width=True): st.session_state.current_page = "help"; st.rerun()
+
+st.markdown("---")
+
+# دالة ذكية لتشغيل الصفحات الفرعية بأمان بدون كسر التصميم الإخراجي
+def run_sub_page(file_path):
+    if os.path.exists(file_path):
         try:
-            return pd.read_excel(FILE_NAME)
+            with open(file_path, encoding="utf-8") as f:
+                code = f.read()
+                # إزالة أي إعداد واجهة فرعي قد يسبب اختفاء باقي الصفحات
+                clean_code = code.replace("st.set_page_config", "# st.set_page_config")
+                exec(clean_code, globals())
         except Exception as e:
-            return pd.DataFrame()
-    return pd.DataFrame()
-
-# دالة تحويل الأكواد لنظام الكشيدة الخاص بك
-def convert_to_kashida_code(input_str):
-    num_map = {'0':'٠', '1':'١', '2':'٢', '3':'٣', '4':'٤', '5':'٥', '6':'٦', '7':'٧', '8':'٨', '9':'٩'}
-    clean_str = input_str.strip()
-    arabic_digits = "".join([num_map.get(char, char) for char in clean_str])
-    if len(arabic_digits) == 4 and arabic_digits.isdigit():
-        return f"{arabic_digits[0]}ــ{arabic_digits[1]}ــ{arabic_digits[2]}ــ{arabic_digits[3]}"
-    return arabic_digits
-
-df = load_fixed_data()
-
-if "current_index" not in st.session_state:
-    st.session_state.current_index = 0
-if "last_query" not in st.session_state:
-    st.session_state.last_query = ""
-
-if not df.empty:
-    # خيار نوع البحث المطور بوضوح خط ممتاز
-    search_type = st.radio(
-        "🗂️ اختر طريقة البحث المناسبة لكود البند:",
-        ["🔍 بحث عام / بنود كهرباء (أرقام عادية أو نصوص)", "✍️ بنود كود الكشيدة (اكتب الأرقام عادية مثل 1124)"],
-        horizontal=True
-    )
-
-    col_input, col_btn = st.columns([6, 1])
-    with col_input:
-        search_query = st.text_input("✍ * أدخل كلمة البحث أو الكود هنا بدون شرط:", placeholder="مثال: 6010151 أو 1124...", label_visibility="collapsed")
-    with col_btn:
-        search_clicked = st.button("بحث 🔍", use_container_width=True)
-
-    if search_query != st.session_state.last_query:
-        st.session_state.current_index = 0
-        st.session_state.last_query = search_query
-
-    if (search_clicked or search_query) and search_query:
-        final_query = search_query.strip().lower()
-        if "بنود كود الكشيدة" in search_type:
-            final_query = convert_to_kashida_code(search_query)
-
-        try:
-            mask = df.astype(str).apply(lambda x: x.str.lower().str.contains(final_query, na=False)).any(axis=1)
-            search_result = df[mask].reset_index(drop=True)
-        except Exception as e:
-            st.error(f"حدثت مشكلة أثناء الفلترة: {e}")
-            search_result = df.reset_index(drop=True)
-
-        if not search_result.empty:
-            total_items = len(search_result)
-            st.markdown(f"### 📊 النتائج المتاحة ({total_items} بند من المقايسة)")
-            
-            # عرض كروت الأسعار الاسترشادية المتواجدة بكودك
-            try:
-                col_price = df.columns[3]
-                prices = pd.to_numeric(search_result[col_price], errors='coerce')
-                c1, c2 = st.columns(2)
-                with c1:
-                    st.metric("أعلى سعر في البحث الحالى", f"{prices.max():,.2f} ج.م" if not pd.isna(prices.max()) else "0.00")
-                with c2:
-                    st.metric("أقل سعر في البحث الحالى", f"{prices.min():,.2f} ج.م" if not pd.isna(prices.min()) else "0.00")
-            except:
-                pass
-
-            # الـ Dropdown الآمن للانتقال المباشر للبنود
-            item_options = [f"بند {i+1} : كود ({search_result.iloc[i].iloc[0]})" for i in range(total_items)]
-            if st.session_state.current_index >= total_items:
-                st.session_state.current_index = 0
-                
-            selected_option = st.selectbox(
-                "🎯 اختر البند مباشرة من هنا للعرض السريع في الكارت:",
-                options=item_options,
-                index=st.session_state.current_index
-            )
-            
-            chosen_index = item_options.index(selected_option)
-            if chosen_index != st.session_state.current_index:
-                st.session_state.current_index = chosen_index
-                st.rerun()
-
-            current_row = search_result.iloc[st.session_state.current_index]
-            item_code = str(current_row.iloc[0])
-            item_desc = str(current_row.iloc[1])
-            
-            # 🏆 المربع الملكي ثلاثي الأبعاد المطور بالكامل وبخطوط كبيرة جداً
-            st.markdown(f"""
-            <div class="gold-card-3d">
-                <h3>🏆 المربع الملكي لبيانات البند التفصيلية</h3>
-                <p><b>📌 موقف البند:</b> عرض بند رقم ({st.session_state.current_index + 1} من إجمالي {total_items})</p>
-                <hr style="margin: 12px 0; border: 0; border-top: 2px dashed #FBBC05;">
-                <p><b>🔢 كود البند الحالي:</b> <span style="color:#1a73e8; font-weight:bold;">{item_code}</span></p>
-                <p><b>📝 وصف وبيان الأعمال:</b> {item_desc}</p>
-                <p><b>📐 الفئة / الوحدة:</b> {current_row.iloc[2]}</p>
-                <p><b>💰 السعر التقريبي بالسوق:</b> <span style="color:#b45309; font-weight:bold; font-size:22px;">{current_row.iloc[3]} ج.م</span></p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            # أزرار النسخ الذكي المتكاملة عبر الـ Clipboard
-            col_cp1, col_cp2 = st.columns(2)
-            with col_cp1:
-                if st.button(f"📋 نسخ كود البند الحالي ({item_code})", key="cp_code_btn", use_container_width=True):
-                    st.components.v1.html(f"<script>navigator.clipboard.writeText('{item_code}');</script>", height=0)
-                    st.toast("✅ تم نسخ كود البند بنجاح!", icon="📋")
-                    
-            with col_cp2:
-                if st.button("📝 نسخ وصف البند بالكامل", key="cp_desc_btn", use_container_width=True):
-                    safe_desc = item_desc.replace("'", "\\'").replace('"', '\\"')
-                    st.components.v1.html(f"<script>navigator.clipboard.writeText('{safe_desc}');</script>", height=0)
-                    st.toast("✅ تم نسخ وصف البند بنجاح!", icon="📝")
-
-            # أزرار التنقل اليدوي (التالي والسابق) المدمجة بتصميم مميز وعريض
-            st.markdown("<br>", unsafe_allow_html=True)
-            col_prev, col_next = st.columns(2)
-            with col_prev:
-                if st.button("➡️ الانتقال للبند السابق", key="nav_prev_btn", use_container_width=True):
-                    if st.session_state.current_index > 0:
-                        st.session_state.current_index -= 1
-                        st.rerun()
-                        
-            with col_next:
-                if st.button("الانتقال للبند التالي ⬅️", key="nav_next_btn", use_container_width=True):
-                    if st.session_state.current_index < total_items - 1:
-                        st.session_state.current_index += 1
-                        st.rerun()
-
-            st.write("---")
-            
-            # الجدول الإجمالي المستقر والآمن لعرض كامل البيانات تحت المربع الملكي
-            columns_titles = list(search_result.columns)
-            reversed_columns = [columns_titles[0], columns_titles[1], columns_titles[2], columns_titles[3]]
-            display_df = search_result[reversed_columns]
-            
-            st.markdown("#### 📊 استعراض جدول نتائج الفلترة بالكامل:")
-            st.dataframe(display_df, use_container_width=True, hide_index=True)
-            
-            # تحضير وتصدير ملف الإكسيل الجاهز للتحميل
-            try:
-                buffer = io.BytesIO()
-                with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-                    search_result.to_excel(writer, index=False, sheet_name='نتائج البحث')
-                st.download_button(
-                    label="📥 تحميل هذه النتائج كملف Excel متكامل",
-                    data=buffer.getvalue(),
-                    file_name=f"نتائج_بحث_{search_query}.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    key="dl_excel_final"
-                )
-            except Exception as e:
-                st.error(f"تعذر تجهيز ملف التحميل: {e}")
-        else:
-            st.info("ℹ️ لم يتم العثور على بنود تطابق كلمة البحث. جرب كلمة أخرى!")
+            st.error(f"حدث خطأ أثناء تشغيل الصفحة: {e}")
     else:
-        st.info("💡 الشاشة جاهزة ونظيفة.. اكتب الكود أو كلمة فنية واضغط 'بحث 🔍' لبدء التصفح الفاخر داخل المربع الملكي.")
+        st.error(f"❌ لم يتم العثور على ملف الصفحة في المسار: {file_path}")
+
+# 🗺️ 5. إدارة التنقل بين الصفحات
+if st.session_state.current_page == "main":
+    st.markdown("<h3 style='color: #202124; font-weight:700; margin-bottom:15px;'>📂 الأقسام الهندسية المتاحة للدخول الفوري:</h3>", unsafe_allow_html=True)
+    
+    # كارت 1
+    st.markdown('<div class="card-3d-deep google-blue"><span class="icon-3d">🔎</span><h2 style="color: #4285F4; font-weight: 700; font-size:24px; margin-bottom:5px;">🔍 1. محرك البحث الشامل والسريع</h2><p style="color: #5f6368; font-size: 16px; font-weight:600;">البحث الفوري والذكي في كافة بنود مقايسة الكهرباء مع ميزة الكشيدة والمربع الملكي التفاعلي.</p></div>', unsafe_allow_html=True)
+    if st.button("🚀 فتح محرك البحث العام الشامل", key="btn_go_search", use_container_width=True): st.session_state.current_page = "search"; st.rerun()
+
+    # كارت 2
+    st.markdown('<div class="card-3d-deep google-green"><span class="icon-3d">🎛️</span><h2 style="color: #34A853; font-weight: 700; font-size:24px; margin-bottom:5px;">🔌 2. صفحة مهندس اللوحات الكهربائية</h2><p style="color: #5f6368; font-size: 16px; font-weight:600;">الفلترة الفنية الدقيقة المخصصة لوصف وجداول لوحات التوزيع بناءً على سعة القاطع والأمبير.</p></div>', unsafe_allow_html=True)
+    if st.button("🚀 فتح صفحة مهندس اللوحات التخصصية", key="btn_go_panels", use_container_width=True): st.session_state.current_page = "panels"; st.rerun()
+
+    # كارت 3
+    st.markdown('<div class="card-3d-deep google-yellow"><span class="icon-3d">📊</span><h2 style="color: #FBBC05; font-weight: 700; font-size:24px; margin-bottom:5px;">🌳 3. التصفح الهرمي والمقارنة الذكية</h2><p style="color: #5f6368; font-size: 16px; font-weight:600;">استكشاف شجري منظم للمجموعات الكهربائية الكبرى وفروعها لتتبع الفروق السعرية.</p></div>', unsafe_allow_html=True)
+    if st.button("🚀 فتح منظومة التصفح الهرمي والمقارنة", key="btn_go_tree", use_container_width=True): st.session_state.current_page = "tree"; st.rerun()
+
+elif st.session_state.current_page == "search":
+    run_sub_page("pages/search.py")
+
+elif st.session_state.current_page == "panels":
+    run_sub_page("pages/2_⚡_مهندس_اللوحات.py")
+
+elif st.session_state.current_page == "tree":
+    run_sub_page("pages/3_🌳_التصفح_الهرمي.py")
+
+elif st.session_state.current_page == "help":
+    # عرض صفحة المساعدة الفاخرة
+    st.markdown('<div class="card-3d-deep google-red"><span class="icon-3d">ℹ️</span><h2 style="color: #EA4335; font-weight: 700; font-size:26px;">💡 دليل المساعدة والدعم الفني للمنظومة</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="help-box"><h4>🔍 محرك البحث</h4><p>يدعم البحث العادي وبحث كود الكشيدة للأبنية التعليمية مع المربع الملكي التفاعلي وأزرار النسخ السريع.</p></div>', unsafe_allow_html=True)
+
+# 👤 6. التوقيع
+st.markdown('<div class="footer-credits">🛠️ <b>فريق الإعداد والتطوير للمنظومة:</b> تم التصميم والتطوير بالكامل تحت الإشراف الهندسي لـ <b>المهندس مصطفى نصر</b> &copy; ٢٠٢٦</div>', unsafe_allow_html=True)
