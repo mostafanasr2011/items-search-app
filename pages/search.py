@@ -6,21 +6,6 @@ import os
 st.title("🔍 محرك البحث العام في بنود الكهرباء")
 st.write("استخدم صندوق البحث في الأسفل للعثور على أي بند من بنود مقايسة الكهرباء الشاملة.")
 
-st.markdown("""
-    <style>
-    html, body, .stApp, .stMarkdown, p, h1, h2, h3, h4, h5, h6, span, label, input, button, select {
-        font-family: 'Cairo', sans-serif !important;
-        text-align: right !important;
-        direction: rtl !important;
-    }
-    .viewerBadge_link__1S137, .styles_viewerBadge__3uC9V, [data-testid="bundle-footer"], footer {
-        visibility: hidden !important;
-        display: none !important;
-    }
-    .block-container { padding-top: 1rem !important; }
-    </style>
-""", unsafe_allow_html=True)
-
 EXCEL_PATH = os.path.join("data", "items.xlsx")
 
 @st.cache_data
@@ -40,7 +25,7 @@ def load_data():
 df = load_data()
 
 if df is not None:
-    search_query = st.text_input("✍️ اكتب كلمة البحث أو الكود (مثال: كشاف، لوحة، كابل):", key="global_search").strip()
+    search_query = st.text_input("✍️ اكتب كلمة البحث أو الكود (مثال: كشاف، لوحة، كابل):", key="global_search_input").strip()
 
     if search_query:
         mask = df.astype(str).apply(lambda row: row.str.contains(search_query, case=False, na=False)).any(axis=1)
@@ -59,7 +44,8 @@ if df is not None:
                     label="📥 تحميل هذه النتائج كملف Excel",
                     data=buffer.getvalue(),
                     file_name=f"نتائج_بحث_{search_query}.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    key="btn_download_search"
                 )
             except Exception as e:
                 st.error(f"تعذر تجهيز ملف التحميل: {e}")
