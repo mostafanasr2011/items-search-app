@@ -6,7 +6,6 @@ import os
 st.title("🔍 محرك البحث العام في بنود الكهرباء")
 st.write("استخدم صندوق البحث في الأسفل للعثور على أي بند من بنود مقايسة الكهرباء الشاملة.")
 
-# إعادة تطبيق الـ CSS للتحكم التام في شكل الواجهة والخطوط
 st.markdown("""
     <style>
     html, body, .stApp, .stMarkdown, p, h1, h2, h3, h4, h5, h6, span, label, input, button, select {
@@ -14,9 +13,7 @@ st.markdown("""
         text-align: right !important;
         direction: rtl !important;
     }
-    #MainMenu, header, footer, [data-testid="stHeader"], [data-testid="stDecoration"], 
-    .viewerBadge_link__1S137, .styles_viewerBadge__3uC9V, [data-testid="bundle-footer"],
-    [data-testid="stStatusWidget"], .stDeployButton, [data-testid="stToolbar"] {
+    .viewerBadge_link__1S137, .styles_viewerBadge__3uC9V, [data-testid="bundle-footer"], footer {
         visibility: hidden !important;
         display: none !important;
     }
@@ -24,7 +21,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# مسار ملف الإكسيل الشامل الجديد
 EXCEL_PATH = os.path.join("data", "items.xlsx")
 
 @st.cache_data
@@ -33,8 +29,12 @@ def load_data():
         df = pd.read_excel(EXCEL_PATH, engine='openpyxl')
         df.columns = df.columns.str.strip()
         return df
+    elif os.path.exists("data.xlsx"):
+        df = pd.read_excel("data.xlsx", engine='openpyxl')
+        df.columns = df.columns.str.strip()
+        return df
     else:
-        st.error(f"❌ تعذر العثور على ملف البيانات في المسار المطلوب: {EXCEL_PATH}")
+        st.error("❌ تعذر العثور على ملف البيانات إكسيل.")
         return None
 
 df = load_data()
@@ -64,6 +64,4 @@ if df is not None:
             except Exception as e:
                 st.error(f"تعذر تجهيز ملف التحميل: {e}")
         else:
-            st.info("ℹ️ لم يتم العثور على بنود تطابق كلمة البحث. جرب كلمة أخرى!")
-    else:
-        st.info("💡 أدخل كلمة مفتاحية أعلاه لبدء الفلترة واستخراج البيانات.")
+            st.info("ℹ️ لم يتم العثور على بنود تطابق كلمة البحث.")
